@@ -1,0 +1,15 @@
+{
+  "python.linting.pycodestyleEnabled": true,
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+  "python.linting.pylintArgs": [
+    "--load-plugins",
+    "pylint_quotes",
+    "--load-plugins",
+    "pylint_pydantic"
+  ],
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.autopep8"
+  },
+  "python.formatting.provider": "none"
+}

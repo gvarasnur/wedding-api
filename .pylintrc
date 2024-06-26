@@ -1,0 +1,8 @@
+[MASTER]
+
+disable=E0402
+init-hook='import sys; sys.path.append("~/.local/lib/python3.10/site-packages")'
+
+string-quote=single
+triple-quote=double
+docstring-quote=double

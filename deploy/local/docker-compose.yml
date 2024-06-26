@@ -1,0 +1,46 @@
+version: '3.5'
+services:
+  invitations-mongo:
+    image: mongo:6.0.3
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGODB_DB_NAME}
+    volumes:
+      - type: volume
+        source: invitations_mongo_db
+        target: /data/db
+
+      - "../mongo-entrypoint/:/opt/"
+
+  invitations:
+    container_name: invitations
+    build:
+      context: ../..
+      dockerfile: ./deploy/local/Dockerfile
+    command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"]
+    ports:
+      - 3000:8000
+      - 5678:5678
+    volumes:
+      - ../../code:/opt/invitations/app
+    depends_on:
+      - invitations-mongo
+    environment:
+      MONGODB_URL: ${MONGODB_URL}
+      MONGODB_USERNAME: ${MONGODB_USERNAME}
+      MONGODB_PASSWORD: ${MONGODB_PASSWORD}
+      MONGODB_DB_NAME: ${MONGODB_DB_NAME}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+
+volumes:
+  invitations_mongo_db:
+
+networks:
+  default:
+    external: true
+    name: wedding-planner-network
