@@ -28,9 +28,23 @@ def get_guests_for_invitation(invitation_id, database):
 def get_guest_from_list(invitation_id, guests):
     """Get all guests for an invitation"""
     for guest in guests:
+        invitation_id = guest.get('invitation_id')
+        if not invitation_id:
+            raise HTTPException(
+                status_code=400, detail='Invitation id is required')
+
         if guest['invitation_id'] == ObjectId(invitation_id):
             return guest
     return None
+
+
+def check_guests_in_invitation(invitation_guest, guests):
+    """Check that all guests are in the invitation"""
+    invitation_guest_ids = [str(guest['_id']) for guest in invitation_guest]
+    for guest in guests:
+        if guest['_id'] not in invitation_guest_ids:
+            return False
+    return True
 
 
 @router.get('/', response_model=list[InvitationGet])
@@ -123,13 +137,20 @@ async def get_invitation_by_guest_name(name: str = '', last_name: str = '', data
             {'_id': guest['invitation_id']})
         guests = get_guests_for_invitation(invitation['_id'], database)
         invitation['guests'] = guests
+
+        # add 1 to seen counter
+        database.invitations.update_one(
+            {'_id': invitation['_id']},
+            {'$set': {'seen': invitation['seen'] + 1}}
+        )
         return invitation
+
     raise HTTPException(status_code=404, detail='Invitation not found')
 
 
 @router.post('/{invitation_id}/guests/confirm', response_model=InvitationGet)
 async def confirm_guests(invitation_id: str,
-                         menu_options: list[str],
+                         guests: list[dict],
                          new_guests: list[dict] = None,
                          database=Depends(get_database)):
     """Confirm all guests for an invitation"""
@@ -150,6 +171,11 @@ async def confirm_guests(invitation_id: str,
         if guest and guest.get('is_plus_one'):
             count_max_new_guests -= 1
 
+    # check that guest to update are in the invitation
+    if not check_guests_in_invitation(invitation_guests, guests):
+        raise HTTPException(
+            status_code=400, detail='Guest not in the invitation')
+
     # check that the new guests are not more than the allowed
     new_guest_length = 0
     if new_guests not in [None, []]:
@@ -158,21 +184,26 @@ async def confirm_guests(invitation_id: str,
     if new_guest_length > count_max_new_guests:
         raise HTTPException(status_code=400, detail='Too many new guests')
 
-    # update the guests
-    for index, guest in enumerate(invitation_guests):
-        guest_id = guest['_id']
+    # update the guests and check if the guests are from the invitation
+
+    for guest in guests:
+        id = guest.get('_id')
+        is_attending = guest.get('is_attending')
+        menu = guest.get('menu')
         database.guests.update_one(
-            {'_id': ObjectId(guest_id)},
-            {'$set': {'is_confirmed': True,
-                      'menu': menu_options[index],
-                      'is_pending': False}},
+            {'_id': ObjectId(id)},
+            {'$set': {
+                'is_attending': is_attending,
+                'menu': menu,
+                'is_pending': False
+            }}
         )
 
     # create the new guests
     if new_guests not in [None, []]:
         for new_guest in new_guests:
             new_guest['invitation_id'] = ObjectId(invitation_id)
-            new_guest['is_confirmed'] = True
+            new_guest['is_attending'] = True
             new_guest['created_at'] = datetime.now()
             new_guest['is_plus_one'] = True
             new_guest['is_pending'] = False

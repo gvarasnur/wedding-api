@@ -12,3 +12,6 @@ db.createUser({
   }]
 })
 EOF
+
+mongosh -u invitations -p invitationsY25ttXbqamgq5sIEoOtISpass <<EOF
+db.createUser({user: 'invitations', pwd: 'invitationsY25ttXbqamgq5sIEoOtISpass', roles:[{ role: 'readWrite', db: 'invitations'}]})

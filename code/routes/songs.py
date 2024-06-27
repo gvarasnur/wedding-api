@@ -60,7 +60,6 @@ async def create_song(name: str,
     song_in_db = SongInDB(
         **song.dict(), **{'created_at': datetime.now()})
 
-    print(song_in_db.dict())
     song_id = database.songs.insert_one(song_in_db.dict()).inserted_id
     song = database.songs.find_one({'_id': song_id})
     return song

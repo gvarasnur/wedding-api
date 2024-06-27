@@ -3,6 +3,7 @@ services:
   invitations-mongo:
     image: mongo:6.0.3
     restart: always
+    container_name: invitations-mongo
     ports:
       - "27017:27017"
     environment:
