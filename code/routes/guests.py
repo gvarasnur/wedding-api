@@ -72,6 +72,9 @@ async def create_guest(name: str,
 
 @router.patch('/{guest_id}')
 async def update_guest(guest_id: str,
+                       inivitation_id: str,
+                       name: str = None,
+                       last_name: str = None,
                        is_confirmed: bool = None,
                        is_pending: bool = None,
                        is_kid: bool = None,
@@ -96,6 +99,12 @@ async def update_guest(guest_id: str,
         fields_to_update['with_plus_one'] = with_plus_one
     if is_plus_one is not None:
         fields_to_update['is_plus_one'] = is_plus_one
+    if name is not None:
+        fields_to_update['name'] = name
+    if last_name is not None:
+        fields_to_update['last_name'] = last_name
+    if inivitation_id is not None:
+        fields_to_update['invitation_id'] = inivitation_id
 
     # Perform the update operation with the fields to update
     result = database.guests.update_one(
