@@ -1,5 +1,6 @@
 """Module with the routes and endpoints of the API"""
 from fastapi.security import OAuth2PasswordBearer
+from fastapi import Response
 from datetime import datetime
 from bson import ObjectId
 
@@ -146,6 +147,11 @@ async def get_invitation_by_guest_name(name: str = '', last_name: str = '', data
         return invitation
 
     raise HTTPException(status_code=404, detail='Invitation not found')
+
+
+@router.options('/{invitation_id}/guests/confirm')
+async def options_confirm_guests(invitation_id: str):
+    return Response(headers={'Allow': 'POST, OPTIONS'})
 
 
 @router.post('/{invitation_id}/guests/confirm', response_model=InvitationGet)
