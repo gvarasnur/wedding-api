@@ -20,13 +20,13 @@ from .errors import validation_exception_bson_handler
 
 app = FastAPI(title='Invitations Service', version='0.0.1')
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # origins
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],  # origins
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
