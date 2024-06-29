@@ -27,6 +27,63 @@ async def get_guests(database=Depends(get_database)):
     return guests
 
 
+@router.get('/count')
+async def count_guests(database=Depends(get_database)):
+    """Count all guests"""
+    all_guests = list(database.guests.find({}))
+    is_adult = 0
+    is_kid = 0
+    attending = 0
+    adult_attending = 0
+    kid_attending = 0
+    not_attending = 0
+    adult_not_attending = 0
+    kid_not_attending = 0
+    pending = 0
+    with_plus_one = 0
+    is_plus_one = 0
+    for guest in all_guests:
+        print(guest)
+        if guest.get('is_kid', False):
+            is_kid += 1
+        else:
+            is_adult += 1
+        if guest.get('is_attending', False) and not guest.get('is_pending', False):
+            attending += 1
+            if guest.get('is_kid', False):
+                kid_attending += 1
+            else:
+                adult_attending += 1
+        if not guest.get('is_attending', False) and not guest.get('is_pending', False):
+            not_attending += 1
+            if guest.get('is_kid', False):
+                kid_not_attending += 1
+            else:
+                adult_not_attending += 1
+        if guest.get('is_pending', False):
+            pending += 1
+        if guest.get('with_plus_one', False):
+            with_plus_one += 1
+        if guest.get('is_plus_one', False):
+            is_plus_one += 1
+
+    total = len(all_guests) + with_plus_one - is_plus_one
+    return {
+        'total': total,
+        'is_adult': is_adult,
+        'is_kid': is_kid,
+        'with_plus_one': with_plus_one,
+        'is_plus_one': is_plus_one,
+        'pending': pending,
+        'attending': attending,
+        'not_attending': not_attending,
+        'adult_attending': adult_attending,
+        'kid_attending': kid_attending,
+        'adult_not_attending': adult_not_attending,
+        'kid_not_attending': kid_not_attending
+    }
+
+
 @router.get('/{guest_id}', response_model=GuestGet)
 async def get_guest(guest_id: str, database=Depends(get_database)):
     """Get a guest"""
