@@ -54,7 +54,7 @@ async def count_guests(database=Depends(get_database)):
                 kid_attending += 1
             else:
                 adult_attending += 1
-        if not guest.get('is_attending', False) and not guest.get('is_pending', False):
+        if not guest.get('is_attending', False) and not guest.get('is_pending', False) and guest.get('is_attending', False) is not None:
             not_attending += 1
             if guest.get('is_kid', False):
                 kid_not_attending += 1
