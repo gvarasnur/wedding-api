@@ -132,7 +132,7 @@ async def update_guest(guest_id: str,
                        inivitation_id: str = None,
                        name: str = None,
                        last_name: str = None,
-                       is_confirmed: bool = None,
+                       is_attending: bool = None,
                        is_pending: bool = None,
                        is_kid: bool = None,
                        menu: FoodOptionsEnum = None,
@@ -144,8 +144,8 @@ async def update_guest(guest_id: str,
     fields_to_update = {}
 
     # Add each field to the dictionary only if its value is not None
-    if is_confirmed is not None:
-        fields_to_update['is_confirmed'] = is_confirmed
+    if is_attending is not None:
+        fields_to_update['is_attending'] = is_attending
     if is_pending is not None:
         fields_to_update['is_pending'] = is_pending
     if is_kid is not None:
